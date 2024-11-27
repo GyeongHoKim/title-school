@@ -2,6 +2,7 @@ import { Devvit } from '@devvit/public-api';
 
 Devvit.configure({
   redditAPI: true,
+  redis: true,
 });
 
 const form = Devvit.createForm(
@@ -14,20 +15,53 @@ const form = Devvit.createForm(
         label: 'Image goes here',
         required: true,
       },
+      {
+        name: 'caption',
+        type: 'string',
+        label: 'Caption This Image!!',
+        required: true,
+      },
     ],
   },
-  (event, context) => {
+  async (event, context) => {
     const imageUrl = event.values.myImage;
-    // Use the mediaUrl to store in redis and display it in an <image> block, or send to external service to modify
+    const caption = event.values.caption;
+    const user = await context.reddit.getCurrentUser();
+    if (!user) {
+      throw new Error('User not found');
+    }
+    await context.redis.set(`${user.id}`, JSON.stringify({
+        imageUrl,
+        caption,
+      }),
+    );
+
+    const currentSubreddit = await context.reddit.getCurrentSubreddit();
+    const post = await context.reddit.submitPost({
+      title: 'Title School',
+      subredditName: currentSubreddit.name,
+      preview: (
+        <vstack
+          grow
+          height="100%"
+          alignment="middle center"
+        >
+          <text size="xlarge" weight="bold">
+            Caption This Image!!
+          </text>
+        </vstack>
+      ),
+    });
+    await context.ui.navigateTo(post);
   }
 );
 
 Devvit.addMenuItem({
-  label: 'Show a dynamic form',
+  label: 'Make a Title School Post',
   location: 'subreddit',
+  forUserType: 'moderator',
   onPress: async (_event, context) => {
     context.ui.showForm(form);
-    // @TODO: 이미지를 Reddis에 업로드 후 post 생성 및 WebView 호출 처리
   },
 });
 
