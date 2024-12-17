@@ -4,13 +4,11 @@
 
 ## DEMO video
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/3oPWWBoxVP8?si=fGmSQO06ElctnLxU" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+[![DEMO thumbnail](https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSB2NdtdVUHTRpgGsFe3IspNVrMaM71aSVj3g&s)](https://youtu.be/3oPWWBoxVP8)
 
 ## Project Overview
 
 This project involves creating a custom subreddit to host an interactive game where users suggest funny captions for images. The goal is to dynamically update a label within a WebView based on the top-voted comment. This concept is inspired by Korean "제목학원" SNS game, where users compete to create the funniest or most fitting captions for a given image.  
-
-![제목학원](https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSB2NdtdVUHTRpgGsFe3IspNVrMaM71aSVj3g&s)
 
 ### Features
 
