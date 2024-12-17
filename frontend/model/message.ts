@@ -3,10 +3,24 @@ interface MessagePayload<T = unknown> {
   payload?: T;
 }
 
-interface MessageResponse<T = unknown> {
+interface MessageData {
   id: string;
-  data?: T;
-  error?: string;
+  data: {
+    postId: string;
+    imageUrl: string;
+    caption: string;
+  };
 }
 
-export type { MessagePayload, MessageResponse };
+interface MessageResponse<T> {
+  type: string;
+  data: {
+    message: {
+      id: string;
+      data: T;
+      error?: string;
+    };
+  };
+}
+
+export type { MessagePayload, MessageData, MessageResponse };

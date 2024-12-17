@@ -1,10 +1,11 @@
 import './createPost.js';
 
-import { Devvit, useAsync } from '@devvit/public-api';
+import { Devvit, JSONObject, useAsync } from '@devvit/public-api';
 
 type WebViewMessage = {
-  type: 'initialData';
-  data: { username: string; imageUrl: string };
+  id: string;
+  eventType: 'title-school';
+  payload?: { userId: string, imageUrl: string, caption: string };
 };
 
 Devvit.configure({
@@ -17,30 +18,37 @@ Devvit.addCustomPostType({
   name: 'Title School',
   height: 'tall',
   render: (context) => {
-    const { data: imageData, loading, error } = useAsync(async () => {
-      const user = await context.reddit.getCurrentUser();
-      if (!user) {
-        throw new Error('User not found');
+    const postId = context.postId;
+    const handleWebViewMessage = async (message: any) => {
+      const requestId = message.id;
+      if (message.eventType !== 'title-school') {
+        context.ui.webView.postMessage('myWebView', {
+          id: requestId,
+          error: 'Invalid event type',
+        });
+        return;
       }
-      const row = await context.redis.get(`${user.id}`);
-      if (!row) {
-        throw new Error('Image not found');
+      try {
+        if (!postId) {
+          throw new Error('Post ID is required');
+        }
+        const data = await context.redis.hGetAll(postId);
+        context.ui.webView.postMessage('myWebView', {
+          id: requestId,
+          data: {
+            postId,
+            imageUrl: data.imageUrl,
+            caption: data.caption,
+          },
+        });
+        console.log(data);
+      } catch (error) {
+        console.error(error);
+        context.ui.webView.postMessage('myWebView', {
+          id: requestId,
+          error: error instanceof Error ? error.message : 'Unknown error',
+        });
       }
-      return JSON.parse(row);
-    });
-
-    if (imageData) {
-      context.ui.webView.postMessage('myWebView', {
-        type: 'image',
-        data: { imageUrl: imageData.imageUrl, caption: imageData.caption },
-      });
-    }
-
-    if (error) {
-      context.ui.webView.postMessage('myWebView', {
-        type: 'error',
-        data: { error: error.message },
-      });
     }
 
     return (
@@ -49,6 +57,7 @@ Devvit.addCustomPostType({
         url="index.html"
         grow
         height="100%"
+        onMessage={handleWebViewMessage}
       />
     );
   },

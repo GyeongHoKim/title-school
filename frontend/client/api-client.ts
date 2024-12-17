@@ -1,4 +1,5 @@
 import { MessagePayload, MessageResponse } from "../model/message";
+import { TitleSchool } from "../model/title-school";
 
 class ApiClient {
   private callbacks: Map<
@@ -10,8 +11,9 @@ class ApiClient {
     window.addEventListener('message', this.handleMessage.bind(this));
   }
 
-  private handleMessage(event: MessageEvent<MessageResponse<unknown>>) {
-    const { id, data, error } = event.data;
+  private handleMessage(event: MessageEvent<MessageResponse<TitleSchool>>) {
+    console.debug('handleMessage', event.data);
+    const { id, data, error } = event.data.data?.message;
 
     if (this.callbacks.has(id)) {
       const { resolve, reject } = this.callbacks.get(id)!;
@@ -40,15 +42,20 @@ class ApiClient {
     const message: MessagePayload<RequestType> & { id: string } = { id, eventType, payload };
 
     return new Promise<ResponseType>((resolve, reject) => {
-      this.callbacks.set(id, { resolve: resolve as (value: unknown) => void, reject: reject as (reason: Error) => void });
+      this.callbacks.set(id, {
+        resolve: resolve as (value: unknown) => void,
+        reject: reject as (reason: Error) => void
+      });
 
+      console.debug('postMessage', message);
       window.parent.postMessage(message, '*');
 
-      setTimeout(() => {
+      const timeout = setTimeout(() => {
         if (this.callbacks.has(id)) {
           this.callbacks.delete(id);
           reject(new Error('ETIMEOUT'));
         }
+        clearTimeout(timeout);
       }, 5000);
     });
   }

@@ -16,6 +16,7 @@ export class TitleSchoolController implements ReactiveController {
     if (isType(data)) {
       return data;
     }
+    console.error('Invalid data type', data);
     throw new Error('Invalid data type');
   }
 
@@ -23,13 +24,16 @@ export class TitleSchoolController implements ReactiveController {
   hostConnected(): void {
     apiClient.get<TitleSchool>('title-school')
       .then((data) => {
+        console.debug('hostConnected', data);
         this.titleSchool = this.typeGuard(data, isTitleSchool);
-        this.host.requestUpdate();
       })
       .catch(() => {
         this.isError = true;
       })
-      .finally(() => this.isLoading = false);
+      .finally(() => {
+        this.isLoading = false;
+        this.host.requestUpdate();
+      });
   }
 
   public refetch(): void {
@@ -40,9 +44,12 @@ export class TitleSchoolController implements ReactiveController {
     apiClient.get<TitleSchool>('title-school')
       .then((data) => {
         this.titleSchool = this.typeGuard(data, isTitleSchool);
-        this.host.requestUpdate();
+        console.debug('refetch', this.titleSchool);
       })
       .catch(() => this.isError = true)
-      .finally(() => this.isLoading = false);
+      .finally(() => {
+        this.isLoading = false;
+        this.host.requestUpdate();
+      });
   }
 }

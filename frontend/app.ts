@@ -1,4 +1,4 @@
-import { css, LitElement } from "lit";
+import { css, LitElement, PropertyValues } from "lit";
 import { html } from "lit/html.js";
 import { customElement } from "lit/decorators.js";
 import { TitleSchoolController } from "./controllers/title-school.controller";
@@ -16,6 +16,7 @@ export class AppComponent extends LitElement {
       background: white;
       border-radius: 0.5rem;
       overflow: hidden;
+      height: 100%;
       box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
     }
     .image-container {
@@ -59,6 +60,11 @@ export class AppComponent extends LitElement {
 
   override connectedCallback(): void {
     super.connectedCallback();
+  }
+
+  protected override updated(_changedProperties: PropertyValues): void {
+    console.debug('updated', this.controller.titleSchool);
+    super.updated(_changedProperties);
   }
 
   override render() {

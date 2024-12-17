@@ -11,7 +11,7 @@ const form = Devvit.createForm(
     fields: [
       {
         name: 'myImage',
-        type: 'image', // This tells the form to expect an image
+        type: 'image',
         label: 'Image goes here',
         required: true,
       },
@@ -24,18 +24,6 @@ const form = Devvit.createForm(
     ],
   },
   async (event, context) => {
-    const imageUrl = event.values.myImage;
-    const caption = event.values.caption;
-    const user = await context.reddit.getCurrentUser();
-    if (!user) {
-      throw new Error('User not found');
-    }
-    await context.redis.set(`${user.id}`, JSON.stringify({
-        imageUrl,
-        caption,
-      }),
-    );
-
     const currentSubreddit = await context.reddit.getCurrentSubreddit();
     const post = await context.reddit.submitPost({
       title: 'Title School',
@@ -52,6 +40,14 @@ const form = Devvit.createForm(
         </vstack>
       ),
     });
+    const imageUrl = event.values.myImage;
+    const caption = event.values.caption;
+    const postId = post.id;
+    await context.redis.hSet(`${postId}`, {
+      imageUrl,
+      caption,
+    });
+
     await context.ui.navigateTo(post);
   }
 );
